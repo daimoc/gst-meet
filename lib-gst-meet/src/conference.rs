@@ -562,8 +562,12 @@ impl StanzaFilter for JitsiConference {
                   debug!("Focus acknowledged session-accept");
 
                   if let Some(colibri_url) = colibri_url {
-                    info!("Connecting Colibri WebSocket to {}", colibri_url);
-                    let colibri_channel = ColibriChannel::new(&colibri_url).await?;
+                     let colibri_url_ext = format!("{}{}", colibri_url , "&room=bob0");
+                     info!("Connecting Colibri WebSocket to {}", colibri_url_ext);
+                     let colibri_channel = ColibriChannel::new(&colibri_url_ext).await?;
+
+                    //info!("Connecting Colibri WebSocket to {}", colibri_url);
+                    //let colibri_channel = ColibriChannel::new(&colibri_url).await?;
                     let (tx, rx) = mpsc::channel(8);
                     colibri_channel.subscribe(tx).await;
                     jingle_session.colibri_channel = Some(colibri_channel);

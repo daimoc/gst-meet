@@ -80,6 +80,7 @@ impl Connection {
     info!("Connecting XMPP WebSocket to {}", websocket_url);
     let request = Request::get(websocket_url)
       .header("Sec-Websocket-Protocol", "xmpp")
+      .header("Origin",format!("{}{}", "https://", xmpp_domain) )
       .body(())
       .context("failed to build WebSocket request")?;
     let (websocket, _response) = tokio_tungstenite::connect_async(request)
