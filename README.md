@@ -12,6 +12,7 @@ Thanks to GStreamer's flexibility and wide range of plugins, this enables many n
 * `gstreamer` 1.19 or later. Most distributions do not package this version yet, so you may need to build from source
 * `gst-plugins-bad` (same version as `gstreamer`) and any other plugins that you want to use in your pipelines
 * `libnice`
+* `pkg-config`
 * A TLS library (usually installed by default, but you may need to install `openssl-dev` or similar on minimal Linux distributions)
 * A Rust toolchain ([rustup](https://rustup.rs/) is the easiest way to install one)
 
@@ -21,13 +22,17 @@ Thanks to GStreamer's flexibility and wide range of plugins, this enables many n
 
 To integrate gst-meet into your own application, add a Cargo dependency on `lib-gst-meet`.
 
-## Development
+## Docker
+
+A `Dockerfile` is provided that uses AVStack-built Alpine APKs for gstreamer 1.19.x.
+
+## Nix
 
 For nix users, a `shell.nix` is provided. Within the repository, run `nix-shell --pure` to get a shell with access to all needed dependencies (and nothing else).
 
-Otherwise, install the dependencies described above, along with their `-dev` packages if your distribution uses them.
+## Development
 
-`cargo build` should then successfully build the libraries and `gst-meet` binary.
+Install the dependencies described above, along with their `-dev` packages if your distribution uses them. `cargo build` should then successfully build the libraries and `gst-meet` binary.
 
 ## Pipeline Structure
 
@@ -95,7 +100,7 @@ gst-meet --web-socket-url=wss://your.jitsi.domain/xmpp-websocket \
                                                capsfilter caps=video/x-vp8 name=video ! muxer.video_0"
 ```
 
-Play a YouTube video in the conference. By requesting Opus audio and VP9 video from YouTube, and setting the Jitsi Meet video codec to VP9, no transcoding is necessary:
+Play a YouTube video in the conference. By requesting Opus audio and VP9 video from YouTube, and setting the Jitsi Meet video codec to VP9, no transcoding is necessary. Note that not every YouTube video has VP9 and Opus available, so the pipeline may need adjusting for other videos.
 
 ```
 YOUTUBE_URL="https://www.youtube.com/watch?v=vjV_2Ri2rfE"
