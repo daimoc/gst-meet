@@ -5,4 +5,5 @@ members = [
   "lib-gst-meet-c",
   "nice-gst-meet",
   "nice-gst-meet-sys",
+  "jitsi-xmpp-parsers",
 ]

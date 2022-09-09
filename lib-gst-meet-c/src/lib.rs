@@ -80,6 +80,7 @@ pub unsafe extern "C" fn gstmeet_connection_new(
   context: *mut Context,
   websocket_url: *const c_char,
   xmpp_domain: *const c_char,
+  tls_insecure: bool,
 ) -> *mut Connection {
   let websocket_url = CStr::from_ptr(websocket_url);
   let xmpp_domain = CStr::from_ptr(xmpp_domain);
@@ -89,6 +90,7 @@ pub unsafe extern "C" fn gstmeet_connection_new(
       &websocket_url.to_string_lossy(),
       &xmpp_domain.to_string_lossy(),
       Authentication::Anonymous,
+      tls_insecure,
     ))
     .map(|(connection, background)| {
       (*context).runtime.spawn(background);
@@ -137,10 +139,13 @@ pub unsafe extern "C" fn gstmeet_connection_join_conference(
   };
   let region = if (*config).region.is_null() {
     None
-  } else {
-    Some(CStr::from_ptr((*config).region)
-      .to_string_lossy()
-      .to_string())
+  }
+  else {
+    Some(
+      CStr::from_ptr((*config).region)
+        .to_string_lossy()
+        .to_string(),
+    )
   };
   let config = JitsiConferenceConfig {
     muc,
@@ -151,6 +156,20 @@ pub unsafe extern "C" fn gstmeet_connection_join_conference(
       .to_string_lossy()
       .to_string(),
     extra_muc_features: vec![],
+
+    // TODO
+    start_bitrate: 800,
+    stereo: false,
+
+    recv_video_scale_width: 1280,
+    recv_video_scale_height: 720,
+
+    buffer_size: 200,
+
+    #[cfg(feature = "log-rtp")]
+    log_rtp: false,
+    #[cfg(feature = "log-rtp")]
+    log_rtcp: false,
   };
   (*context)
     .runtime

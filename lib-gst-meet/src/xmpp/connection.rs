@@ -5,6 +5,7 @@ use futures::{
   sink::{Sink, SinkExt},
   stream::{Stream, StreamExt, TryStreamExt},
 };
+use rand::{thread_rng, RngCore};
 use tokio::sync::{mpsc, oneshot, Mutex};
 use tokio_stream::wrappers::ReceiverStream;
 use tokio_tungstenite::tungstenite::{
@@ -21,7 +22,9 @@ use xmpp_parsers::{
   BareJid, Element, FullJid, Jid,
 };
 
-use crate::{pinger::Pinger, stanza_filter::StanzaFilter, util::generate_id, xmpp};
+use crate::{
+  pinger::Pinger, stanza_filter::StanzaFilter, tls::wss_connector, util::generate_id, xmpp,
+};
 
 #[derive(Debug, Clone, Copy)]
 enum ConnectionState {
@@ -59,6 +62,7 @@ impl fmt::Debug for ConnectionInner {
 pub struct Connection {
   pub(crate) tx: mpsc::Sender<Element>,
   inner: Arc<Mutex<ConnectionInner>>,
+  pub(crate) tls_insecure: bool,
 }
 
 pub enum Authentication {
@@ -71,19 +75,37 @@ impl Connection {
     websocket_url: &str,
     xmpp_domain: &str,
     authentication: Authentication,
+    tls_insecure: bool,
   ) -> Result<(Self, impl Future<Output = ()>)> {
     let websocket_url: Uri = websocket_url.parse().context("invalid WebSocket URL")?;
     let xmpp_domain: BareJid = xmpp_domain.parse().context("invalid XMPP domain")?;
 
     info!("Connecting XMPP WebSocket to {}", websocket_url);
-    let request = Request::get(websocket_url)
-      .header("Sec-Websocket-Protocol", "xmpp")
+
+    let mut key = [0u8; 16];
+    thread_rng().fill_bytes(&mut key);
+    let request = Request::get(&websocket_url)
+      .header("sec-websocket-protocol", "xmpp")
+      .header("sec-websocket-key", base64::encode(&key))
       .header("Origin",format!("{}{}", "https://", xmpp_domain) )
+      .header("sec-websocket-version", "13")
+      .header(
+        "host",
+        websocket_url
+          .host()
+          .context("invalid WebSocket URL: missing host")?,
+      )
+      .header("connection", "Upgrade")
+      .header("upgrade", "websocket")
       .body(())
       .context("failed to build WebSocket request")?;
-    let (websocket, _response) = tokio_tungstenite::connect_async(request)
-      .await
-      .context("failed to connect XMPP WebSocket")?;
+    let (websocket, _response) = tokio_tungstenite::connect_async_tls_with_config(
+      request,
+      None,
+      Some(wss_connector(tls_insecure).context("failed to build TLS connector")?),
+    )
+    .await
+    .context("failed to connect XMPP WebSocket")?;
     let (sink, stream) = websocket.split();
     let (tx, rx) = mpsc::channel(64);
 
@@ -100,6 +122,7 @@ impl Connection {
     let connection = Self {
       tx: tx.clone(),
       inner: inner.clone(),
+      tls_insecure,
     };
 
     let writer = Connection::write_loop(rx, sink);
@@ -248,10 +271,9 @@ impl Connection {
             info!("My JID: {}", jid);
             locked_inner.jid = Some(jid.clone());
 
-            locked_inner.stanza_filters.push(Box::new(Pinger {
-              jid: jid.clone(),
-              tx: tx.clone(),
-            }));
+            locked_inner
+              .stanza_filters
+              .push(Box::new(Pinger::new(jid.clone(), tx.clone())));
 
             let iq = Iq::from_get(generate_id(), DiscoInfoQuery { node: None })
               .with_from(Jid::Full(jid.clone()))
