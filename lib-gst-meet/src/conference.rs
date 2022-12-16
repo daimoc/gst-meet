@@ -642,14 +642,26 @@ impl StanzaFilter for JitsiConference {
                 if Some(iq.id) == jingle_session.accept_iq_id {
                   let colibri_url = jingle_session.colibri_url.clone();
 
+
+     
+
+
+                  
                   jingle_session.accept_iq_id = None;
 
                   debug!("Focus acknowledged session-accept");
 
                   if let Some(colibri_url) = colibri_url {
                     info!("Connecting Colibri WebSocket to {}", colibri_url);
+
+                    let muc_room_str = self.config.muc.to_string();
+                    let tokens:Vec<&str>= muc_room_str.split("@").collect();
+                    let colibri_url_ext = format!("{}&room={}", colibri_url , tokens[0] );
+  
+                    info!("Connecting Colibri WebSocket to {}", colibri_url_ext);
                     let colibri_channel =
-                      ColibriChannel::new(&colibri_url, self.tls_insecure).await?;
+                     ColibriChannel::new(&colibri_url_ext, self.tls_insecure).await?;
+
                     let (tx, rx) = mpsc::channel(8);
                     colibri_channel.subscribe(tx).await;
                     jingle_session.colibri_channel = Some(colibri_channel.clone());

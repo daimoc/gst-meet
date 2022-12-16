@@ -1,9 +1,37 @@
 use xmpp_parsers::{
-  jingle_ssma::{Parameter, Semantics},
+  jingle_ssma::{Parameter},
   ns::JINGLE_SSMA,
 };
 
 use crate::ns::JITSI_MEET;
+
+generate_attribute!(
+  /// From RFC5888, the list of allowed semantics.
+  Semantics, "semantics", {
+      /// Lip Synchronization, defined in RFC5888.
+      Ls => "LS",
+
+      /// Flow Identification, defined in RFC5888.
+      Fid => "FID",
+
+      /// Single Reservation Flow, defined in RFC3524.
+      Srf => "SRF",
+
+      /// Alternative Network Address Types, defined in RFC4091.
+      Anat => "ANAT",
+
+      /// Forward Error Correction, defined in RFC4756.
+      Fec => "FEC",
+
+      /// Decoding Dependency, defined in RFC5583.
+      Ddp => "DDP",
+
+      Sim => "SIM",
+
+      Bundle => "BUNDLE"
+  }
+);
+
 
 generate_element!(
   /// Source element for the ssrc SDP attribute.

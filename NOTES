@@ -1,0 +1,49 @@
+sudo docker run -it  a23589145ed3sh
+
+gst-meet  --room-name bob --web-socket-url wss://rendez-vous.renater.fr/xmpp-websocket?room=bob --xmpp-domain=rendez-vous.renater.fr --verbose=3 --send-pipeline="filesrc location=/media/bbb.webm ! queue ! matroskademux name=demuxer demuxer.video_0 ! queue name=video  demuxer.audio_0 ! queue ! vorbisdec ! audioconvert ! audioresample ! opusenc name=audio"
+
+
+ sudo docker run gst-meet --room-name bob --web-socket-url wss://rendez-vous.renater.fr/xmpp-websocket?room=bob --xmpp-domain=rendez-vous.renater.fr --verbose=3 --send-pipeline="filesrc location=/media/bbb.webm ! queue ! matroskademux name=demuxer demuxer.video_0 ! queue name=video  demuxer.audio_0 ! queue ! vorbisdec ! audioconvert ! audioresample ! opusenc name=audio"
+
+
+
+sudo docker  run -e GST_DEBUG=3 gst-meet --room-name bob0 --web-socket-url wss://rendez-vous.renater.fr/xmpp-websocket?room=bob0 --xmpp-domain=rendez-vous.renater.fr --focus-jid=focus.rendez-vous.renater.fr --verbose=3 --send-pipeline="filesrc location=/media/bbb.webm ! queue ! matroskademux name=demuxer demuxer.video_0 ! queue name=video  demuxer.audio_0 ! queue ! vorbisdec ! audioconvert ! audioresample ! opusenc name=audio"
+
+
+
+sudo docker container kill `sudo docker ps |grep "gst-meet"|awk '{print $1}'`
+
+
+
+
+GST_DEBUG=3 target/release/gst-meet --room-name bob0 --web-socket-url wss://rendez-vous.renater.fr/xmpp-websocket?room=bob0 --xmpp-domain=rendez-vous.renater.fr --focus-jid=focus.rendez-vous.renater.fr --video-codec=vp8  --verbose=3 --send-pipeline="filesrc location=/media/bbb.webm ! queue ! matroskademux name=demuxer demuxer.video_0 ! queue name=video  demuxer.audio_0 ! queue ! vorbisdec ! audioconvert ! audioresample ! opusenc name=audio"
+
+
+
+
+sudo docker run gst-meet --room-name bob --web-socket-url wss://rendez-vous.renater.fr/xmpp-websocket?room=bob --xmpp-domain=rendez-vous.renater.fr --verbose=3 --send-pipeline="filesrc location=/media/bbb.webm ! queue ! matroskademux name=demuxer demuxer.video_0 ! queue name=video  demuxer.audio_0 ! queue ! vorbisdec ! audioconvert ! audioresample ! opusenc name=audio"
+
+
+docker run --network host gstmeet --room-name bob --web-socket-url wss://rendez-vous.renater.fr/xmpp-websocket?room=bob --xmpp-domain=rendez-vous.renater.fr --verbose=3 --send-pipeline="filesrc location=/media/bbb.webm ! queue ! matroskademux name=demuxer demuxer.video_0 ! queue name=video  demuxer.audio_0 ! queue ! vorbisdec ! audioconvert ! audioresample ! opusenc name=audio"
+
+
+docker run --network host  --mount type=bind,source="$(pwd)"/media,target=/media  gstmeet --video-codec=vp8 --room-name bob --web-socket-url wss://rendez-vous.renater.fr/xmpp-websocket?room=bob --xmpp-domain=rendez-vous.renater.fr --verbose=3 --send-pipeline="filesrc location=/media/bbb25.webm ! queue ! matroskademux name=demuxer demuxer.video_0 ! queue name=video  demuxer.audio_0 ! queue ! vorbisdec ! audioconvert ! audioresample ! opusenc name=audio"
+
+
+
+docker run --network host  --mount type=bind,source="$(pwd)"/media,target=/media  gstmeet --video-codec=vp8 --room-name bob --web-socket-url wss://rendez-vous.renater.fr/xmpp-websocket?room=bob --xmpp-domain=rendez-vous.renater.fr --verbose=3 --send-pipeline="filesrc location=/media/bbb25.webm ! queue ! matroskademux name=demuxer demuxer.video_0 ! queue name=video  demuxer.audio_0 ! queue ! vorbisdec ! audioconvert ! audioresample ! opusenc name=audio"
+
+
+
+
+docker run --mount type=bind,source="$(pwd)"/media,target=/media  gstmeet --video-codec=vp8 --room-name bob0 --web-socket-url wss://rendez-vous.renater.fr/xmpp-websocket?room=bob0 --xmpp-domain=rendez-vous.renater.fr --verbose=3 --send-pipeline="filesrc location=/media/bbb.webm ! queue ! matroskademux name=demuxer demuxer.video_0 ! queue name=video  demuxer.audio_0 ! queue ! vorbisdec ! audioconvert ! audioresample ! audio/x-raw,channels=2  ! opusenc name=audio"
+
+
+
+
+
+docker run --cpu-rt-runtime=950000 --ulimit rtprio=99 --cap-add=sys_nice --mount type=bind,source="$(pwd)"/media,target=/media  gstmeet
+
+
+
+docker run --mount type=bind,source="$(pwd)"/media,target=/media  gstmeet --video-codec=vp8 --room-name bob0 --web-socket-url wss://rendez-vous.renater.fr/xmpp-websocket?room=bob0 --xmpp-domain=rendez-vous.renater.fr --verbose=3 --send-pipeline="filesrc location=/media/bbb.webm ! queue ! matroskademux name=demuxer demuxer.video_0 ! queue name=video  demuxer.audio_0 ! queue ! vorbisdec ! audioconvert ! audioresample ! audio/x-raw,channels=2  ! opusenc name=audio"

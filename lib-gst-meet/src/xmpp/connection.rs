@@ -86,6 +86,7 @@ impl Connection {
     let request = Request::get(&websocket_url)
       .header("sec-websocket-protocol", "xmpp")
       .header("sec-websocket-key", base64::encode(&key))
+      .header("Origin",format!("{}{}", "https://", xmpp_domain) )
       .header("sec-websocket-version", "13")
       .header(
         "host",
@@ -285,15 +286,21 @@ impl Connection {
           ),
         },
         Discovering => {
+          let mut ns = xmpp::ns::EXTDISCO::TWO;
           let iq = Iq::try_from(element)?;
           if let IqType::Result(Some(element)) = iq.payload {
             let _disco_info = DiscoInfoResult::try_from(element)?;
+            if !(_disco_info.features.contains(&xmpp_parsers::disco::Feature {
+              var: xmpp::ns::EXTDISCO_TWO.to_string()
+            })) {
+              ns = xmpp::ns::EXTDISCO::ONE;
+            };
           }
           else {
             bail!("disco failed");
           }
 
-          let iq = Iq::from_get(generate_id(), xmpp::extdisco::ServicesQuery {})
+          let iq = Iq::from_get(generate_id(), xmpp::extdisco::ServicesQuery { ns })
             .with_from(Jid::Full(
               locked_inner.jid.as_ref().context("missing jid")?.clone(),
             ))
