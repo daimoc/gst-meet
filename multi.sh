@@ -8,5 +8,5 @@ for i in `seq 1 $NB`
 do
 sh $SCRIPT $ROOM&
 echo $i
-sleep 2
+sleep 1
 done
